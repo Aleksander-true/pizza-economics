@@ -1,0 +1,17 @@
+{
+  "name": "pizza-economics",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "bundle": "esbuild scripts/build.ts --bundle --platform=node --format=esm --packages=external --outfile=.cache/build.mjs && node .cache/build.mjs",
+    "build": "npm run check && npm run bundle",
+    "dev": "esbuild scripts/build.ts --bundle --platform=node --format=esm --packages=external --outfile=.cache/build.mjs && node .cache/build.mjs --serve"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.30",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}
