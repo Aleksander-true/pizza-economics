@@ -26,6 +26,7 @@ export interface Level {
   id: number;
   title: string;
   lesson: string;
+  tip?: string;
   hints: readonly string[];
   ingredientIds: readonly IngredientId[];
   stock: Amounts;
@@ -34,9 +35,18 @@ export interface Level {
   recipes: readonly Recipe[];
   offers: readonly Offer[];
 }
+export type LevelDefinition = Omit<Level, 'stock'> & { delivery: Amounts };
+export interface RoundInventory {
+  levelId: number;
+  carryover: Amounts;
+  delivery: Amounts;
+  best?: { profit: number; stars: number; remaining: Amounts };
+  migrated?: boolean;
+}
 export interface Batch {
   id: number;
   size: PizzaSize;
+  // Фактические порции на одну пиццу, включая тесто.
   portions: Amounts;
   quantity: number;
 }
@@ -69,6 +79,12 @@ export interface OptimalPlan {
   batches: Batch[];
 }
 export interface RoundResult {
+  carryover: Amounts;
+  keptBest: boolean;
+  grossProfit: number;
+  hintCost: number;
+  awarded: number;
+  previousBest: number;
   profit: number;
   optimum: number;
   stars: number;
@@ -79,7 +95,16 @@ export interface LevelProgress {
   stars: number;
   profit: number;
 }
+export interface NotebookRow {
+  id: number;
+  pizzas: string;
+  profit: string;
+}
 export interface Progress {
-  version: 1;
+  version: 3;
+  round?: RoundInventory;
+  balance: number;
   levels: Record<number, LevelProgress>;
+  notebooks: Record<number, NotebookRow[]>;
+  seenFeatures: string[];
 }

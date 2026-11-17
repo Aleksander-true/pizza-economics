@@ -12,15 +12,15 @@ export function evaluatePlan(level: Level, batches: readonly Batch[]): PlanEvalu
   for (const batch of batches) {
     const factor = SIZE_FACTORS[batch.size];
     const valid = level.sizes.includes(batch.size) && Number.isSafeInteger(batch.quantity) && batch.quantity >= 0
-      && batch.portions.dough === 1
+      && batch.portions.dough === factor
       && INGREDIENT_IDS.every(id => Number.isSafeInteger(batch.portions[id]) && batch.portions[id] >= 0
         && (level.ingredientIds.includes(id) || batch.portions[id] === 0));
     if (!valid) {
       issues.push({ type: 'invalid-batch', batchId: batch.id });
       continue;
     }
-    const portions = amounts(INGREDIENT_IDS.map(id => batch.portions[id] * factor));
-    const recipe = level.recipes.find(candidate => INGREDIENT_IDS.every(id => candidate.portions[id] === batch.portions[id]));
+    const portions = { ...batch.portions };
+    const recipe = level.recipes.find(candidate => INGREDIENT_IDS.every(id => candidate.portions[id] * factor === batch.portions[id]));
     const offer = recipe && level.offers.find(item => item.recipeId === recipe.id && item.size === batch.size);
     const unitCost = INGREDIENT_IDS.reduce((sum, id) => sum + portions[id] * level.costs[id], 0);
     const unitPrice = offer?.price ?? 0;
@@ -70,7 +70,7 @@ export function findOptimalPlan(level: Level): OptimalPlan {
   return {
     profit: result.profit,
     batches: result.counts.flatMap((quantity, i) => quantity ? [{
-      id: i + 1, size: variants[i].size, portions: { ...variants[i].recipe.portions }, quantity,
+      id: i + 1, size: variants[i].size, portions: amounts(variants[i].use), quantity,
     }] : []),
   };
 }
